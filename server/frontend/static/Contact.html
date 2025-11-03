@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <!-- Link the style sheet here -->
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/bootstrap.min.css" />
+  </head>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="site-logo" href="/">Best Cars</a>
+
+      <nav class="navitems" aria-label="Primary">
+        <a class="nav_item" href="/">Home</a>
+        <a class="nav_item" href="/about">About</a>
+        <a class="nav_item" href="/dealers">View Dealerships</a>
+        <a class="nav_item active" href="/contact.html" aria-current="page"
+          >Contact Us</a
+        >
+      </nav>
+    </div>
+  </header>
+
+    <div style="display: flex;flex-direction: column;">
+        <div class="card" style="width: 50%;margin-top: 50px;align-self: center;">
+            {% load static %}
+            <img src="{% static '/cars.jpeg' %}" class="card-img-top" alt="">
+            <div class="banner">
+                <h1 class="title">Contact Us</h1>
+            </div>
+        </div>
+    </div>
+
+
+    <section class="contact-grid">
+      <article class="contact-card">
+        <h2 class="card-title">Headquarters</h2>
+        <p class="details">
+          1234 Aurora Blvd, Suite 500<br />
+          Seattle, WA 98101, USA
+        </p>
+        <p class="details">
+          <strong>Phone:</strong> (206) 555-0147<br />
+          <strong>Email:</strong> support@bestcars.com
+        </p>
+        <p class="details">
+          <strong>Hours:</strong> Mon–Fri, 9:00 AM–6:00 PM PT
+        </p>
+      </article>
+
+      <article class="contact-card">
+        <h2 class="card-title">Customer Care</h2>
+        <p class="details">
+          Need order help, returns, or affiliate questions? We’re here.
+        </p>
+        <ul class="contact-list">
+          <li>Live Chat: 7:00 AM–9:00 PM PT</li>
+          <li>Text: (206) 555-0199</li>
+          <li>Press & Partnerships: press@kenshobuy.com</li>
+        </ul>
+      </article>
+
+      <article class="contact-card">
+        <h2 class="card-title">Send Us a Message</h2>
+        <form class="contact-form" action="#" method="post">
+          <label class="sr-only" for="name">Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Your Name"
+            required
+          />
+
+          <label class="sr-only" for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+          />
+
+          <label class="sr-only" for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="5"
+            placeholder="How can we help?"
+            required
+          ></textarea>
+
+          <button type="submit" class="btn-primary">Send Message</button>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>© 2025 BestCars · All rights reserved.</small>
+    </div>
+  </footer>
+</html>

@@ -1,18 +1,36 @@
-# Uncomment the imports before you add the code
-# from django.urls import path
+# urls.py (inside djangoapp)
+
+# Uncommented imports
+from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-# from . import views
+from django.views.generic import TemplateView
+from . import views
 
-app_name = 'djangoapp'
+app_name = "djangoapp"
+
 urlpatterns = [
-    # # path for registration
+    # Home / dealerships list
+    path("", views.get_dealerships, name="index"),
+    path("dealers/", views.get_dealerships, name="dealers"),
 
-    # path for login
-    # path(route='login', view=views.login_user, name='login'),
+    # Contact page (uses a template called contact.html)
+    path("contact/", TemplateView.as_view(template_name="contact.html"), name="contact"),
 
-    # path for dealer reviews view
+    # Auth JSON endpoints
+    path("register", views.registration, name="register"),
+    path("login", views.login_user, name="login"),
+    path("logout", views.logout_request, name="logout"),
+    path("api/whoami", views.whoami, name="api-whoami"),
 
-    # path for add a review view
+    # Dealer details + reviews
+    path("dealer/<int:dealer_id>/", views.get_dealer_details, name="dealer_details"),
+    path("dealer/<int:dealer_id>/reviews/", views.get_dealer_reviews, name="dealer_reviews"),
+    path(route='get_cars', view=views.get_cars, name ='getcars'),
+    # Add a review (requires login in the view)
+    path("dealer/<int:dealer_id>/add-review/", views.add_review, name="add_review"),
+]
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve static & media in development
+urlpatterns += static(settings.STATIC_URL, document_root=getattr(settings, "STATIC_ROOT", None))
+urlpatterns += static(settings.MEDIA_URL, document_root=getattr(settings, "MEDIA_ROOT", None))

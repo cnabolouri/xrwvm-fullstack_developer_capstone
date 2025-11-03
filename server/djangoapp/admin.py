@@ -1,7 +1,3 @@
-# from django.contrib import admin
-# from .models import related models
-
-
 # Register your models here.
 
 # CarModelInline class
@@ -10,4 +6,15 @@
 
 # CarMakeAdmin class with CarModelInline
 
-# Register models here
+
+
+from django.contrib import admin
+from .models import CarMake, CarModel
+
+@admin.register(CarMake)
+class CarMakeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+
+@admin.register(CarModel)
+class CarModelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'make', 'type', 'year')

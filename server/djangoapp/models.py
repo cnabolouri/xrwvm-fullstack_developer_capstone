@@ -1,25 +1,104 @@
-# Uncomment the following imports before adding the Model code
-
 # from django.db import models
 # from django.utils.timezone import now
 # from django.core.validators import MaxValueValidator, MinValueValidator
 
+# # Car manufacturer (e.g., Toyota, BMW)
+# class CarMake(models.Model):
+#     name = models.CharField(max_length=100, unique=True)
+#     description = models.TextField(blank=True)
+#     headquarters = models.CharField(max_length=120, blank=True)
+#     founded = models.IntegerField(
+#         null=True, blank=True,
+#         help_text="Year the make was founded (optional)"
+#     )
+#     created_at = models.DateTimeField(default=now, editable=False)
 
-# Create your models here.
+#     class Meta:
+#         ordering = ["name"]
 
-# <HINT> Create a Car Make model `class CarMake(models.Model)`:
-# - Name
-# - Description
-# - Any other fields you would like to include in car make model
-# - __str__ method to print a car make object
+#     def __str__(self):
+#         return self.name
 
 
-# <HINT> Create a Car Model model `class CarModel(models.Model):`:
-# - Many-To-One relationship to Car Make model (One Car Make has many
-# Car Models, using ForeignKey field)
-# - Name
-# - Type (CharField with a choices argument to provide limited choices
-# such as Sedan, SUV, WAGON, etc.)
-# - Year (IntegerField) with min value 2015 and max value 2023
-# - Any other fields you would like to include in car model
-# - __str__ method to print a car make object
+# # Specific model of a make (e.g., Corolla, 3-Series)
+# class CarModel(models.Model):
+#     # one make → many models
+#     make = models.ForeignKey(CarMake, on_delete=models.CASCADE, related_name="models")
+
+#     # basic fields
+#     name = models.CharField(max_length=100)
+
+#     # dealer id stored in Cloudant / external DB (as per lab)
+#     dealer_id = models.IntegerField(
+#         help_text="Dealer id of the model in Cloudant database"
+#     )
+
+#     # limited types
+#     SEDAN = "SEDAN"
+#     SUV = "SUV"
+#     WAGON = "WAGON"
+#     COUPE = "COUPE"
+#     HATCH = "HATCH"
+#     TRUCK = "TRUCK"
+
+#     TYPE_CHOICES = [
+#         (SEDAN, "Sedan"),
+#         (SUV, "SUV"),
+#         (WAGON, "Wagon"),
+#         (COUPE, "Coupe"),
+#         (HATCH, "Hatchback"),
+#         (TRUCK, "Truck"),
+#     ]
+#     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=SEDAN)
+
+#     # year constrained to 2015–2023 per instructions
+#     year = models.IntegerField(
+#         validators=[MinValueValidator(2015), MaxValueValidator(2023)]
+#     )
+
+#     # optional extras
+#     color = models.CharField(max_length=40, blank=True)
+#     created_at = models.DateTimeField(default=now, editable=False)
+
+#     class Meta:
+#         unique_together = ("make", "name", "year")
+#         ordering = ["make__name", "name", "-year"]
+
+#     def __str__(self):
+#         return f"{self.make.name} {self.name} ({self.year})"
+
+
+
+from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+class CarMake(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    # headquarters = models.CharField(max_length=120, blank=True, null=True, default="")  
+    def __str__(self):
+        return self.name
+
+class CarModel(models.Model):
+    SEDAN = "SEDAN"
+    SUV = "SUV"
+    WAGON = "WAGON"
+    COUPE = "COUPE"
+    HATCH = "HATCH"
+    TRUCK = "TRUCK"
+    TYPE_CHOICES = [
+        (SEDAN, "Sedan"),
+        (SUV, "SUV"),
+        (WAGON, "Wagon"),
+        (COUPE, "Coupe"),
+        (HATCH, "Hatchback"),
+        (TRUCK, "Truck"),
+    ]
+
+    make = models.ForeignKey(CarMake, on_delete=models.CASCADE, related_name="models")
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    year = models.IntegerField(validators=[MinValueValidator(2015), MaxValueValidator(2023)])
+
+    def __str__(self):
+        return f"{self.make.name} {self.name} ({self.year})"
