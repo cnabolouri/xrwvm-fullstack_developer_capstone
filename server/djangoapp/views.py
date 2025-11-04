@@ -1,5 +1,4 @@
 
-
 # views.py
 
 # --- Required imports (uncommented) ---
@@ -16,6 +15,7 @@ import json
 from django.views.decorators.http import require_http_methods
 from .models import CarMake, CarModel
 from .populate import initiate
+from .restapis import get_request, analyze_review_sentiments, post_review
 
 logger = logging.getLogger(__name__)
 
@@ -143,97 +143,123 @@ def whoami(request):
     return JsonResponse({"isAuthenticated": False, "userName": ""})
 
 # ----------------------------- PAGES ------------------------------------------
-def get_dealerships(request):
-    """
-    Render the home page with a list of dealerships.
-    Replace the stub with: dealers = get_dealers_from_cf()
-    """
-    dealers = _stub_get_dealers_from_cf()  # TODO: get_dealers_from_cf()
-    context = {"dealership_list": dealers}
-    return render(request, "Home.html", context)
+# def get_dealerships(request, state="All"):
+#     endpoint = "/fetchDealers" if state == "All" else f"/fetchDealers/{state}"
+#     dealerships = get_request(endpoint)
+#     return JsonResponse({"status": 200, "dealers": dealerships})
 
+
+def get_dealerships(request, state="All"):
+    endpoint = "/fetchDealers" if state == "All" else f"/fetchDealers/{state}"
+    dealers = get_request(endpoint)
+    return JsonResponse({"status": 200, "dealers": dealers})
 
 def get_dealer_details(request, dealer_id: int):
-    """
-    Render dealer details page (dealer info + reviews).
-    """
-    dealer = _stub_get_dealer_by_id(dealer_id)  # TODO: real call
-    if not dealer:
-        messages.error(request, "Dealer not found.")
-        return redirect("index")
-
-    reviews = _stub_get_dealer_reviews_from_cf(dealer_id)  # TODO: real call
-    context = {"dealer": dealer, "reviews": reviews}
-    return render(request, "dealer_details.html", context)
-
+    dealer = get_request(f"/fetchDealer/{dealer_id}")
+    return JsonResponse({"status": 200, "dealer": dealer})
 
 def get_dealer_reviews(request, dealer_id: int):
-    """
-    If you keep a separate page just for reviews.
-    """
-    dealer = _stub_get_dealer_by_id(dealer_id)
-    if not dealer:
-        messages.error(request, "Dealer not found.")
-        return redirect("index")
+    reviews = get_request(f"/fetchReviews/dealer/{dealer_id}")
+    enriched = []
+    for r in reviews or []:
+        item = {
+            "id": r.get("id"),
+            "name": r.get("name"),
+            "dealership": r.get("dealership"),
+            "review": r.get("review"),
+            "purchase": r.get("purchase"),
+            "purchase_date": r.get("purchase_date"),
+            "car_make": r.get("car_make"),
+            "car_model": r.get("car_model"),
+            "car_year": r.get("car_year"),
+        }
+        item["sentiment"] = analyze_review_sentiments(item["review"])
+        enriched.append(item)
+    return JsonResponse({"status": 200, "reviews": enriched})
 
-    reviews = _stub_get_dealer_reviews_from_cf(dealer_id)  # TODO
-    context = {"dealer": dealer, "reviews": reviews}
-    return render(request, "dealer_reviews.html", context)
 
 
-@login_required(login_url="/login")
-def add_review(request, dealer_id: int):
-    """
-    GET: render review form
-    POST: submit review to backend (replace stub with your POST call)
-    """
-    dealer = _stub_get_dealer_by_id(dealer_id)
-    if not dealer:
-        messages.error(request, "Dealer not found.")
-        return redirect("index")
+# @login_required(login_url="/login")
+# def add_review(request, dealer_id: int):
+#     """
+#     GET: render review form
+#     POST: submit review to backend (replace stub with your POST call)
+#     """
+#     dealer = _stub_get_dealer_by_id(dealer_id)
+#     if not dealer:
+#         messages.error(request, "Dealer not found.")
+#         return redirect("index")
 
-    if request.method == "GET":
-        return render(request, "add_review.html", {"dealer": dealer})
+#     if request.method == "GET":
+#         return render(request, "add_review.html", {"dealer": dealer})
 
-    # POST
-    review_text = request.POST.get("review", "").strip()
-    purchase = request.POST.get("purchase") == "on"
-    purchase_date = request.POST.get("purchase_date") or None
-    car_make = request.POST.get("car_make") or ""
-    car_model = request.POST.get("car_model") or ""
-    car_year = request.POST.get("car_year") or ""
+#     # POST
+#     review_text = request.POST.get("review", "").strip()
+#     purchase = request.POST.get("purchase") == "on"
+#     purchase_date = request.POST.get("purchase_date") or None
+#     car_make = request.POST.get("car_make") or ""
+#     car_model = request.POST.get("car_model") or ""
+#     car_year = request.POST.get("car_year") or ""
 
-    payload = {
-        "time": datetime.utcnow().isoformat(),
-        "name": request.user.get_full_name() or request.user.username,
-        "dealership": dealer_id,
-        "review": review_text,
-        "purchase": purchase,
-        "purchase_date": purchase_date,
-        "car_make": car_make,
-        "car_model": car_model,
-        "car_year": car_year,
-    }
+#     payload = {
+#         "time": datetime.utcnow().isoformat(),
+#         "name": request.user.get_full_name() or request.user.username,
+#         "dealership": dealer_id,
+#         "review": review_text,
+#         "purchase": purchase,
+#         "purchase_date": purchase_date,
+#         "car_make": car_make,
+#         "car_model": car_model,
+#         "car_year": car_year,
+#     }
 
-    ok = _stub_post_review_to_cf(payload)  # TODO: replace with real post_review()
-    if ok and (ok.get("ok") or ok is True):
-        messages.success(request, "Thanks! Your review was submitted.")
-    else:
-        messages.error(request, "Could not submit review. Please try again.")
+#     ok = _stub_post_review_to_cf(payload)  # TODO: replace with real post_review()
+#     if ok and (ok.get("ok") or ok is True):
+#         messages.success(request, "Thanks! Your review was submitted.")
+#     else:
+#         messages.error(request, "Could not submit review. Please try again.")
 
-    return redirect("dealer_details", dealer_id=dealer_id)
+#     return redirect("dealer_details", dealer_id=dealer_id)
+
+@csrf_exempt
+def add_review(request):
+    """Authenticated users can post a dealer review."""
+    if request.method != "POST":
+        return JsonResponse({"status": 405, "message": "Method not allowed"}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": 403, "message": "Unauthorized"}, status=403)
+
+    try:
+        data = json.loads(request.body or "{}")
+        resp = post_review(data)
+        return JsonResponse({"status": 200, "result": resp})
+    except Exception as e:
+        return JsonResponse({"status": 401, "message": f"Error in posting review: {e}"}, status=400)
+
+
+# def get_cars(request):
+#     # populate only if empty
+
+
+#     # If your FK is named 'make' (as above):
+#     qs = CarModel.objects.select_related("make").all()
+
+#     cars = [
+#         {"CarModel": c.name, "CarMake": c.make.name, "Type": c.type, "Year": c.year}
+#         for c in qs
+#     ]
+#     return JsonResponse({"CarModels": cars})
 
 def get_cars(request):
-    # populate only if empty
     if CarMake.objects.count() == 0 or CarModel.objects.count() == 0:
         initiate()
-
-    # If your FK is named 'make' (as above):
-    qs = CarModel.objects.select_related("make").all()
-
-    cars = [
-        {"CarModel": c.name, "CarMake": c.make.name, "Type": c.type, "Year": c.year}
-        for c in qs
+        
+    cars = CarModel.objects.select_related("make").values(
+        "make__name", "name", "year"
+    )
+    car_list = [
+        {"CarMake": c["make__name"], "CarModel": c["name"], "CarYear": c["year"]}
+        for c in cars
     ]
-    return JsonResponse({"CarModels": cars})
-
+    return JsonResponse({"CarModels": car_list}, safe=False)
