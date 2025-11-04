@@ -1,35 +1,4 @@
-# import os, requests
-# from dotenv import load_dotenv
-
-# load_dotenv()
-# backend_url = (os.getenv("backend_url") or "").rstrip("/")
-
-# def get_request(endpoint, **kwargs):
-#     url = f"{backend_url}{endpoint}"
-#     try:
-#         # requests will add the query string from kwargs safely
-#         r = requests.get(url, params=kwargs, timeout=10)
-#         r.raise_for_status()
-#         return r.json()
-#     except Exception as e:
-#         print(f"[get_request] error calling {url}: {e}")
-#         return []  # return an empty list instead of None
-
-
-
-
-# def analyze_review_sentiments(text):
-#     request_url = sentiment_analyzer_url+"analyze/"+text
-#     try:
-#         # Call get method of requests library with URL and parameters
-#         response = requests.get(request_url)
-#         return response.json()
-#     except Exception as err:
-#         print(f"Unexpected {err=}, {type(err)=}")
-#         print("Network exception occurred")
-
-
-# server/djangoapp/restapis.py
+#server/djangoapp/restapis.py
 import os, requests
 from urllib.parse import quote_plus
 from dotenv import load_dotenv

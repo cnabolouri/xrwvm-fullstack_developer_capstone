@@ -1,6 +1,3 @@
-# urls.py (inside djangoapp)
-
-# Uncommented imports
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
@@ -39,6 +36,5 @@ urlpatterns = [
 
 ]
 
-# Serve static & media in development
 urlpatterns += static(settings.STATIC_URL, document_root=getattr(settings, "STATIC_ROOT", None))
 urlpatterns += static(settings.MEDIA_URL, document_root=getattr(settings, "MEDIA_ROOT", None))

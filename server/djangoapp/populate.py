@@ -1,8 +1,9 @@
 from .models import CarMake, CarModel
 
+
 def initiate():
     if CarMake.objects.exists() and CarModel.objects.exists():
-        return  # already populated
+        return  
 
     makes = [
         {"name": "NISSAN", "description": "Great cars. Japanese technology"},
